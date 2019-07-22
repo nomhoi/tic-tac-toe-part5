@@ -1,0 +1,15 @@
+version: '3.6'
+services:
+  beast:
+    container_name: beast
+    build:
+      context: beast/
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - backend
+
+networks:
+  backend:
+    name: backend
