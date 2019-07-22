@@ -119,7 +119,7 @@ handle_request(
         res.prepare_payload();
         return res;
     };
-
+	
     // Returns a not found response
     auto const not_found =
     [&req](beast::string_view target)
@@ -202,6 +202,25 @@ handle_request(
 }
 
 //------------------------------------------------------------------------------
+// Return a random number
+template<
+    class Body, class Allocator,
+    class Send>
+void
+handle_number_request(
+    beast::string_view doc_root,
+    http::request<Body, http::basic_fields<Allocator>>&& req,
+    Send&& send)
+{
+	http::response<http::string_body> res;
+	res.version(11);   // HTTP/1.1
+	res.result(http::status::ok);
+	res.set(http::field::server, "Beast");
+	res.body() = std::to_string(rand() % 9);
+	res.prepare_payload();
+	return send(std::move(res));
+}
+//------------------------------------------------------------------------------
 
 // Report a failure
 void
@@ -270,8 +289,12 @@ do_session(
         if(ec)
             return fail(ec, "read");
 
-        // Send the response
-        handle_request(*doc_root, std::move(req), lambda);
+		// Send the response
+		std::string number("number");
+		if (beast::iequals(req.target(), "/number"))
+			handle_number_request(*doc_root, std::move(req), lambda);
+		else       
+			handle_request(*doc_root, std::move(req), lambda);
         if(ec)
             return fail(ec, "write");
         if(close)
