@@ -24,7 +24,6 @@ RUN g++ http_server_sync.cpp -o http_server_sync -lpthread
 
 FROM ubuntu:bionic 
 COPY --from=build /cpp/src/project /app/
-COPY --from=build /cpp/src/project/index.html /app/wwwroot/index.html
 
 ENTRYPOINT ["/app/http_server_sync", "0.0.0.0", "8080", "/app/wwwroot"]
 
